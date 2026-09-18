@@ -5,6 +5,17 @@
 import * as Sentry from "@sentry/nextjs";
 import { resolveSentryDsn, isCommunityDsn, integracoesDoCliente } from "./lib/sentry/dsn";
 import { sentryScrubHooks } from "./lib/sentry/scrub";
+import { blindarDomContraTradutorDoNavegador } from "./lib/dom/blindagem-tradutor";
+
+// Chrome/Edge Translate reescreve nós de texto por fora do React. Quando o
+// React tenta depois desmontar/mover exatamente esse nó (troca de tela do
+// onboarding, QR do WhatsApp conectando, um Select fechando), o DOM real já
+// mudou de baixo dele e `removeChild`/`insertBefore` lançam `NotFoundError`,
+// derrubando a árvore inteira no error boundary genérico. Cobrir cada
+// componente com `translate="no"` ajuda mas nunca termina — qualquer tela
+// nova reabre o mesmo buraco. A blindagem é no método do DOM, uma vez, e vale
+// para toda a árvore, presente e futura.
+blindarDomContraTradutorDoNavegador();
 
 const sentryDsn = resolveSentryDsn(
   typeof window !== "undefined" ? window.__PUBLIC_ENV__?.SENTRY_DSN : undefined,
