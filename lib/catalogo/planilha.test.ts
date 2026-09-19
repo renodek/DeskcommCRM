@@ -51,7 +51,9 @@ describe("lerPlanilha — mensagens de erro passam por t()", () => {
     const csv = "codigo,nome,preco\nX1,Produto,abc\n";
     const resultado = lerPlanilha(csv);
     if ("erro" in resultado) throw new Error("não deveria ser erro de planilha inteira");
-    expect(resultado.erros[0]!.motivo).toBe('preço não reconhecido ("abc") — escreva assim: 5.499,00');
+    expect(resultado.erros[0]!.motivo).toBe(
+      'preço não reconhecido ("abc") — escreva assim: 5.499,00',
+    );
   });
 });
 
@@ -119,5 +121,25 @@ describe("lerPlanilha — a recusa nomeia a coluna que falta", () => {
     const erro = recusa("nome,marca\nCafé,Melitta\n", espanhol);
     expect(erro).toBe("La planilla necesita una columna de precio. Encontré: nome, marca.");
     expect(erro).not.toContain("de nombre");
+  });
+});
+
+describe("lerPlanilha — reconhece o cabeçalho em espanhol e francês", () => {
+  it("mapeia 'Producto'/'Precio' (es), não só 'Produto'/'Preço'", () => {
+    // Sem os apelidos em es, "Precio" caía em colunasIgnoradas e o produto
+    // entrava sem preço — recusado como se a coluna nunca tivesse existido.
+    const resultado = lerPlanilha("Codigo,Producto,Precio\nX1,Café,10.00\n");
+    if ("erro" in resultado) throw new Error("não deveria ser erro de planilha inteira");
+    expect(resultado.colunasIgnoradas).toEqual([]);
+    expect(resultado.produtos[0]!.nome).toBe("Café");
+    expect(resultado.produtos[0]!.preco_cents).toBe(1000);
+  });
+
+  it("mapeia 'Nom'/'Prix' (fr), não só 'Nome'/'Preço'", () => {
+    const resultado = lerPlanilha("Code,Nom,Prix\nX1,Café,10.00\n");
+    if ("erro" in resultado) throw new Error("não deveria ser erro de planilha inteira");
+    expect(resultado.colunasIgnoradas).toEqual([]);
+    expect(resultado.produtos[0]!.nome).toBe("Café");
+    expect(resultado.produtos[0]!.preco_cents).toBe(1000);
   });
 });

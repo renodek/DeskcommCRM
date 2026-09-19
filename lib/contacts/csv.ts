@@ -128,12 +128,13 @@ export function decodificarBytesDeTexto(bytes: ArrayBuffer | Uint8Array): BytesD
  * rotas de contatos, leads e produtos chamam. Ele continua sendo o nome público
  * que o #483 deixou; a regra é que passou a ter nome de gente.
  */
-export function decodificarCsv(bytes: ArrayBuffer | Uint8Array): { texto: string } | { erro: string } {
+export function decodificarCsv(
+  bytes: ArrayBuffer | Uint8Array,
+): { texto: string } | { erro: string } {
   const decodificado = decodificarBytesDeTexto(bytes);
   if ("binario" in decodificado) {
     return {
-      erro:
-        "Este arquivo não parece ser um CSV de texto. No Excel use “Salvar como” → “CSV UTF-8 (delimitado por vírgulas)”.",
+      erro: "Este arquivo não parece ser um CSV de texto. No Excel use “Salvar como” → “CSV UTF-8 (delimitado por vírgulas)”.",
     };
   }
   return decodificado;
@@ -240,18 +241,55 @@ function detectDelimiter(text: string): string {
 // ---------------------------------------------------------------------------
 
 /**
- * Aceita apelidos pt-BR/en porque a planilha é feita por humano: quem importa
- * tem "Telefone" no Excel, não "phone_number". Acento/caixa/separador são
- * normalizados ("Data de Nascimento" → data_de_nascimento).
+ * Aceita apelidos pt-BR/es/fr/en porque a planilha é feita por humano: quem
+ * importa tem "Telefone", "Teléfono" ou "Téléphone" no Excel, não
+ * "phone_number". Acento/caixa/separador são normalizados ("Data de
+ * Nascimento" → data_de_nascimento).
+ *
+ * O espanhol e o francês entraram depois do português — a tela já dizia
+ * "colunas reconhecidas: nome, telefone..." em es/fr (dicionario.ts), mas só
+ * a forma em português era reconhecida aqui. Quem seguia a própria tela ao pé
+ * da letra tinha o cabeçalho recusado ou, pior, uma planilha inteira caindo
+ * em "linha sem telefone nem e-mail" porque a coluna de telefone nunca era
+ * mapeada.
  */
 const HEADER_ALIASES: Record<string, readonly string[]> = {
-  name: ["name", "nome", "cliente"],
-  display_name: ["display_name", "apelido", "nome_de_exibicao"],
-  email: ["email", "e_mail"],
-  phone_number: ["phone_number", "telefone", "whatsapp", "celular", "fone"],
+  name: ["name", "nome", "cliente", "nombre", "nom"],
+  display_name: [
+    "display_name",
+    "apelido",
+    "nome_de_exibicao",
+    "apodo",
+    "nombre_de_visualizacion",
+    "surnom",
+    "nom_affiche",
+  ],
+  email: ["email", "e_mail", "correo", "correo_electronico", "courriel"],
+  phone_number: [
+    "phone_number",
+    "telefone",
+    "whatsapp",
+    "celular",
+    "fone",
+    "telefono",
+    "movil",
+    "telephone",
+    "portable",
+  ],
   cpf: ["cpf"],
-  birthdate: ["birthdate", "nascimento", "data_de_nascimento", "aniversario"],
-  tags: ["tags", "etiquetas", "grupos"],
+  birthdate: [
+    "birthdate",
+    "nascimento",
+    "data_de_nascimento",
+    "aniversario",
+    "nacimiento",
+    "fecha_de_nacimiento",
+    "cumpleanos",
+    "naissance",
+    "date_de_naissance",
+    "anniversaire",
+  ],
+  tags: ["tags", "etiquetas", "grupos", "etiquettes", "groupes"],
 };
 
 function normalizaHeader(h: string): string {

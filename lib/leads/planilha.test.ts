@@ -48,7 +48,9 @@ describe("lerPlanilhaDeLeads — mensagens de erro passam por t()", () => {
     const csv = "nome,valor\nNegócio,abc\n";
     const resultado = lerPlanilhaDeLeads(csv, gritar);
     if ("erro" in resultado) throw new Error("não deveria ser erro de planilha inteira");
-    expect(resultado.erros[0]!.motivo).toBe('VALOR NO RECONOCIDO ("abc") — ESCRÍBALO ASÍ: 1.200,00');
+    expect(resultado.erros[0]!.motivo).toBe(
+      'VALOR NO RECONOCIDO ("abc") — ESCRÍBALO ASÍ: 1.200,00',
+    );
   });
 
   it("telefone não reconhecido — traduz por completo", () => {
@@ -66,6 +68,24 @@ describe("lerPlanilhaDeLeads — mensagens de erro passam por t()", () => {
     const csv = "nome,valor\nNegócio,abc\n";
     const resultado = lerPlanilhaDeLeads(csv);
     if ("erro" in resultado) throw new Error("não deveria ser erro de planilha inteira");
-    expect(resultado.erros[0]!.motivo).toBe('valor não reconhecido ("abc") — escreva assim: 1.200,00');
+    expect(resultado.erros[0]!.motivo).toBe(
+      'valor não reconhecido ("abc") — escreva assim: 1.200,00',
+    );
+  });
+
+  it("reconhece o cabeçalho em espanhol e francês, não só em português", () => {
+    // Sem os apelidos em es/fr, "Teléfono"/"Téléphone" e "Precio"/"Prix" caíam
+    // em colunasIgnoradas e o lead entrava sem telefone nem valor.
+    const es = lerPlanilhaDeLeads("Negocio,Telefono,Precio\nVenta,11999999999,1500\n");
+    if ("erro" in es) throw new Error("não deveria ser erro de planilha inteira");
+    expect(es.colunasIgnoradas).toEqual([]);
+    expect(es.leads[0]!.telefone).toBe("+5511999999999");
+    expect(es.leads[0]!.value_cents).toBe(150000);
+
+    const fr = lerPlanilhaDeLeads("Affaire,Telephone,Prix\nVente,11999999999,1500\n");
+    if ("erro" in fr) throw new Error("não deveria ser erro de planilha inteira");
+    expect(fr.colunasIgnoradas).toEqual([]);
+    expect(fr.leads[0]!.telefone).toBe("+5511999999999");
+    expect(fr.leads[0]!.value_cents).toBe(150000);
   });
 });

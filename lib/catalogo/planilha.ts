@@ -20,24 +20,63 @@ import { precoParaCentavos } from "@/lib/schemas/produtos";
  * errado dito a um cliente depois.
  */
 
-/** Como cada coluna pode vir escrita. A primeira forma é a que a gente sugere. */
+/**
+ * Como cada coluna pode vir escrita. A primeira forma é a que a gente sugere.
+ *
+ * Formas em espanhol e francês entraram junto com a tradução da tela — sem
+ * elas, quem seguia o cabeçalho sugerido no próprio idioma (`precio`,
+ * `prix`) tinha a coluna recusada ou ignorada em silêncio.
+ */
 const COLUNAS: Record<string, readonly string[]> = {
-  codigo: ["codigo", "código", "sku", "ref", "referencia", "referência", "cod"],
-  nome: ["nome", "produto", "descricao", "descrição", "titulo", "título", "item"],
-  preco: ["preco", "preço", "valor", "preco de venda", "preço de venda", "venda"],
-  custo: ["custo", "preco de custo", "preço de custo", "compra"],
-  marca: ["marca", "fabricante"],
-  categoria: ["categoria", "tipo", "departamento"],
-  quantidade: ["quantidade", "estoque", "qtd", "qtde", "qty"],
+  codigo: ["codigo", "código", "sku", "ref", "referencia", "referência", "cod", "code"],
+  nome: [
+    "nome",
+    "produto",
+    "descricao",
+    "descrição",
+    "titulo",
+    "título",
+    "item",
+    "producto",
+    "descripcion",
+    "nom",
+    "produit",
+    "description",
+    "titre",
+    "article",
+  ],
+  preco: [
+    "preco",
+    "preço",
+    "valor",
+    "preco de venda",
+    "preço de venda",
+    "venda",
+    "precio",
+    "precio de venta",
+    "venta",
+    "prix",
+    "prix de vente",
+    "vente",
+  ],
+  custo: [
+    "custo",
+    "preco de custo",
+    "preço de custo",
+    "compra",
+    "costo",
+    "precio de costo",
+    "cout",
+    "prix de revient",
+    "achat",
+  ],
+  marca: ["marca", "fabricante", "marque", "fabricant"],
+  categoria: ["categoria", "tipo", "departamento", "categorie", "type", "departement"],
+  quantidade: ["quantidade", "estoque", "qtd", "qtde", "qty", "cantidad", "stock", "quantite"],
 };
 
 function normalizarCabecalho(texto: string): string {
-  return texto
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/\s+/g, " ")
-    .trim();
+  return texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
 }
 
 /** Qual campo do produto esta coluna da planilha representa? */
@@ -149,8 +188,7 @@ export function lerPlanilha(
           ? _t("A planilha precisa de uma coluna de nome. Encontrei: ")
           : _t("A planilha precisa de uma coluna de preço. Encontrei: ");
     return {
-      erro:
-        pedido + (cabecalho.filter((c) => c.trim()).join(", ") || _t("nenhuma coluna")) + ".",
+      erro: pedido + (cabecalho.filter((c) => c.trim()).join(", ") || _t("nenhuma coluna")) + ".",
     };
   }
 
@@ -178,7 +216,10 @@ export function lerPlanilha(
       erros.push({
         linha: numeroNaPlanilha,
         motivo:
-          _t("preço não reconhecido (") + `"${valor("preco")}"` + ")" + _t(" — escreva assim: 5.499,00"),
+          _t("preço não reconhecido (") +
+          `"${valor("preco")}"` +
+          ")" +
+          _t(" — escreva assim: 5.499,00"),
       });
       continue;
     }

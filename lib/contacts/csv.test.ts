@@ -19,7 +19,10 @@ describe("parseCsv", () => {
   });
 
   it("remove BOM UTF-8 do Excel", () => {
-    expect(parseCsv("\uFEFFnome,tel\nana,+5511")).toEqual([["nome", "tel"], ["ana", "+5511"]]);
+    expect(parseCsv("\uFEFFnome,tel\nana,+5511")).toEqual([
+      ["nome", "tel"],
+      ["ana", "+5511"],
+    ]);
   });
 
   it("aceita ponto-e-vírgula (export pt-BR do Excel)", () => {
@@ -52,12 +55,21 @@ describe("parseCsv", () => {
   });
 
   it("aceita CRLF e CR sozinho (Excel/legado Mac)", () => {
-    expect(parseCsv("a,b\r\n1,2")).toEqual([["a", "b"], ["1", "2"]]);
-    expect(parseCsv("a,b\r1,2")).toEqual([["a", "b"], ["1", "2"]]);
+    expect(parseCsv("a,b\r\n1,2")).toEqual([
+      ["a", "b"],
+      ["1", "2"],
+    ]);
+    expect(parseCsv("a,b\r1,2")).toEqual([
+      ["a", "b"],
+      ["1", "2"],
+    ]);
   });
 
   it("descarta linha vazia final", () => {
-    expect(parseCsv("a,b\n1,2\n")).toEqual([["a", "b"], ["1", "2"]]);
+    expect(parseCsv("a,b\n1,2\n")).toEqual([
+      ["a", "b"],
+      ["1", "2"],
+    ]);
   });
 
   it("aspas só abrem campo se estiver no início dele (não come o resto)", () => {
@@ -79,6 +91,32 @@ describe("mapHeader", () => {
   it("sem identificador (telefone/e-mail) falha aberto com motivo", () => {
     const { motivo } = mapHeader(["Nome", "Idade"]);
     expect(motivo).toMatch(/sem coluna de telefone nem e-mail/);
+  });
+
+  it("mapeia o cabeçalho em espanhol sugerido pela própria tela", () => {
+    // A tela em espanhol sugere "nombre, teléfono, email, cpf, nacimiento,
+    // tags" (dicionario.ts) — sem o apelido em es aqui, a coluna de telefone
+    // nunca era mapeada e cada linha caía em "sem telefone nem e-mail".
+    const { indices, motivo } = mapHeader(["Nombre", "Teléfono", "Email", "Nacimiento", "Tags"]);
+    expect(motivo).toBeNull();
+    expect(indices.name).toBe(0);
+    expect(indices.phone_number).toBe(1);
+    expect(indices.email).toBe(2);
+    expect(indices.birthdate).toBe(3);
+    expect(indices.tags).toBe(4);
+  });
+
+  it("mapeia o cabeçalho em francês sugerido pela própria tela", () => {
+    // A tela em francês sugere "nom, téléphone, e-mail, cpf, naissance, tags"
+    // (dicionario.ts) — mesmo defeito do espanhol, reproduzido por um usuário
+    // real ao importar contatos.
+    const { indices, motivo } = mapHeader(["Nom", "Téléphone", "E-Mail", "Naissance", "Tags"]);
+    expect(motivo).toBeNull();
+    expect(indices.name).toBe(0);
+    expect(indices.phone_number).toBe(1);
+    expect(indices.email).toBe(2);
+    expect(indices.birthdate).toBe(3);
+    expect(indices.tags).toBe(4);
   });
 });
 

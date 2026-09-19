@@ -39,25 +39,81 @@ import { precoParaCentavos } from "@/lib/schemas/produtos";
  * linha recusada com o motivo, nunca um chute.
  */
 
-/** Como cada coluna pode vir escrita. A primeira forma é a que a gente sugere. */
+/**
+ * Como cada coluna pode vir escrita. A primeira forma é a que a gente sugere.
+ *
+ * Formas em espanhol e francês entraram junto com a tradução da tela — sem
+ * elas, quem seguia o cabeçalho sugerido no próprio idioma (`negocio`,
+ * `affaire`, `telephone`) tinha a coluna recusada ou ignorada em silêncio.
+ */
 const COLUNAS: Record<string, readonly string[]> = {
-  titulo: ["nome", "titulo", "título", "lead", "negocio", "negócio", "oportunidade", "empresa", "assunto"],
-  contato: ["nome do contato", "contato", "responsavel", "responsável", "pessoa"],
-  telefone: ["telefone", "celular", "whatsapp", "fone", "phone"],
-  email: ["email", "e-mail"],
-  descricao: ["descricao", "descrição", "observacao", "observação", "observacoes", "observações", "notas", "detalhes"],
-  valor: ["valor", "preco", "preço", "ticket", "value"],
-  origem: ["origem", "fonte", "canal", "source"],
-  etiquetas: ["tags", "etiquetas", "marcadores"],
+  titulo: [
+    "nome",
+    "titulo",
+    "título",
+    "lead",
+    "negocio",
+    "negócio",
+    "oportunidade",
+    "empresa",
+    "assunto",
+    "oportunidad",
+    "nom",
+    "titre",
+    "opportunite",
+    "entreprise",
+    "affaire",
+    "sujet",
+  ],
+  contato: [
+    "nome do contato",
+    "contato",
+    "responsavel",
+    "responsável",
+    "pessoa",
+    "nombre del contacto",
+    "responsable",
+    "persona",
+    "nom du contact",
+    "contact",
+    "personne",
+  ],
+  telefone: [
+    "telefone",
+    "celular",
+    "whatsapp",
+    "fone",
+    "phone",
+    "telefono",
+    "movil",
+    "telephone",
+    "portable",
+  ],
+  email: ["email", "e-mail", "correo", "correo electronico", "courriel"],
+  descricao: [
+    "descricao",
+    "descrição",
+    "observacao",
+    "observação",
+    "observacoes",
+    "observações",
+    "notas",
+    "detalhes",
+    "descripcion",
+    "observaciones",
+    "detalles",
+    "description",
+    "observations",
+    "notes",
+    "details",
+  ],
+  valor: ["valor", "preco", "preço", "ticket", "value", "precio", "prix", "valeur"],
+  origem: ["origem", "fonte", "canal", "source", "fuente", "origine"],
+  etiquetas: ["tags", "etiquetas", "marcadores", "etiquettes", "groupes"],
 };
 
 function normalizarCabecalho(texto: string): string {
-  return texto
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/\s+/g, " ")
-    .trim();
+  return texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
 }
 
 function campoDaColuna(cabecalho: string): string | null {
@@ -154,7 +210,10 @@ export function lerPlanilhaDeLeads(
       erros.push({
         linha: numeroNaPlanilha,
         motivo:
-          _t("valor não reconhecido (") + `"${valorTexto}"` + ")" + _t(" — escreva assim: 1.200,00"),
+          _t("valor não reconhecido (") +
+          `"${valorTexto}"` +
+          ")" +
+          _t(" — escreva assim: 1.200,00"),
       });
       continue;
     }
