@@ -83,7 +83,7 @@ describe("Accept-Language de quem ainda não tem sessão", () => {
   });
 
   it("sem nenhum idioma suportado na lista, devolve null (cai no padrão depois)", () => {
-    expect(parseAcceptLanguage("en-US,en;q=0.9,fr;q=0.8")).toBeNull();
+    expect(parseAcceptLanguage("en-US,en;q=0.9,de;q=0.8")).toBeNull();
   });
 
   it("cabeçalho ausente ou vazio devolve null", () => {

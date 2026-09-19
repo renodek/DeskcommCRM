@@ -74,6 +74,15 @@ export const REGISTRO_DE_IDIOMAS = [
     mantenedor: "mantenedores do projeto",
   },
   {
+    codigo: "fr",
+    nomeNativo: "Français",
+    rotuloCurto: "FR",
+    tagBcp47: "fr",
+    subtagsDoNavegador: ["fr"],
+    nivel: "completo",
+    mantenedor: "mantenedores do projeto",
+  },
+  {
     codigo: "zh-CN",
     nomeNativo: "简体中文",
     rotuloCurto: "中",
